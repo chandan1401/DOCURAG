@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}DocuRAG Studio — Query Insights & Logs{% endblock %}
+
+{% block nav_history %}text-cyan-600 dark:text-white font-semibold bg-cyan-500/10 dark:bg-white/10 border border-cyan-500/20 dark:border-white/10 shadow-xs{% endblock %}
+
+{% block extra_head %}
+<style>
+    .glass-card {
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+    .dark .glass-card {
+        background: rgba(13, 20, 36, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    }
+    :root:not(.dark) .glass-card {
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.05), inset 0 1px 1px #ffffff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+            <h1 class="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Query Insights & Logs</h1>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Review past analytical questions, retrieval timings, and verified citations.</p>
+        </div>
+        <a href="/ask/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white text-xs font-semibold shadow-md shadow-cyan-500/20 transition-all self-start sm:self-auto hover:scale-105">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+            <span>Ask In Studio</span>
+        </a>
+    </div>
+
+    <!-- Search / Filter Bar -->
+    <div class="glass-card p-3.5 rounded-2xl flex items-center gap-3">
+        <div class="w-5 h-5 text-cyan-600 dark:text-cyan-400 pl-1">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+        </div>
+        <input type="text" id="historySearchInput" placeholder="Filter questions, topics, or keywords..." class="w-full bg-transparent border-none text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-0">
+        <span id="historyCountBadge" class="text-xs px-3 py-1 rounded-full bg-slate-200/60 dark:bg-white/5 border border-slate-300/60 dark:border-white/10 text-cyan-600 dark:text-cyan-300 font-medium whitespace-nowrap">0 Queries</span>
+    </div>
+
+    <!-- History Card List -->
+    <div id="historyList" class="space-y-4">
+        <div class="text-center py-12 text-slate-500 dark:text-slate-400 text-sm">Loading query history...</div>
+    </div>
+</div>
+{% endblock %}

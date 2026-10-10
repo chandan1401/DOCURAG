@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Environment Variables
+.env
+.env.local
+
+# Storage & Caches
+storage/
+.pytest_cache/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+
+# IDE & OS
+.vscode/
+.idea/
+(Get-Content .gitignore) -replace "^\.DS_Store'$", ".DS_Store" | Set-Content .gitignore
+
+Add-Content .gitignore @'
+
+# Scratch browser profiles and test artifacts
+scratch_chrome_profile/
+scratch_edge_profile/
+.agents/
+*.sqlite3
+'@
+Thumbs.db
+
+# Local scratch scripts (may contain keys)
+local_scratch/

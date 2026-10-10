@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Sign up - DocuRAG{% endblock %}
+
+{% block content %}
+<section class="flex-1 flex items-center justify-center px-4 py-16">
+  <div class="glass-panel w-full max-w-md rounded-3xl p-8">
+    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Create your account</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Start asking questions about your documents.</p>
+
+    <form method="post" class="mt-6 space-y-4" novalidate>
+      {% csrf_token %}
+      <div>
+        <label for="id_name" class="block mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">Full name</label>
+        <input type="text" name="name" id="id_name" value="{{ form.name.value|default:'' }}" required autofocus autocomplete="name" class="field">
+        {% for e in form.name.errors %}<p class="mt-1 text-xs text-red-500">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        <label for="id_email" class="block mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">Email</label>
+        <input type="email" name="email" id="id_email" value="{{ form.email.value|default:'' }}" required autocomplete="email" class="field" placeholder="you@example.com">
+        {% for e in form.email.errors %}<p class="mt-1 text-xs text-red-500">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        <label for="id_password1" class="block mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">Password</label>
+        <input type="password" name="password1" id="id_password1" required autocomplete="new-password" class="field">
+        <p class="mt-1 text-[11px] text-slate-500 dark:text-slate-400">Use at least 8 characters.</p>
+        {% for e in form.password1.errors %}<p class="mt-1 text-xs text-red-500">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        <label for="id_password2" class="block mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">Confirm password</label>
+        <input type="password" name="password2" id="id_password2" required autocomplete="new-password" class="field">
+        {% for e in form.password2.errors %}<p class="mt-1 text-xs text-red-500">{{ e }}</p>{% endfor %}
+      </div>
+      <button type="submit" class="btn-primary w-full">Sign up</button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+      Already have an account? <a href="{% url 'login' %}" class="font-medium text-cyan-600 dark:text-cyan-400 hover:underline">Log in</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DocuRAG Studio{% endblock %}</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/static/favicon.ico" sizes="48x48">
+    <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+    <meta name="theme-color" content="#02040a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+        if (localStorage.getItem('docurag_theme') === 'light') {
+            document.documentElement.classList.remove('dark');
+        } else {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #030611;
+        }
+
+        /* ─── DUAL-THEME ANIMATED AURORA SYSTEM (Dark Aurora & Light Morning Sky) ─── */
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .dark body {
+            background-color: #02040a;
+            color: #f1f5f9;
+        }
+
+        :root:not(.dark) body {
+            background-color: #f8fafc;
+            color: #0f172a;
+        }
+
+        .aurora-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+            transition: background-color 0.4s ease;
+        }
+
+        .dark .aurora-bg {
+            background-color: #02040a;
+        }
+
+        :root:not(.dark) .aurora-bg {
+            background-color: #f8fafc;
+        }
+
+        /* Luminous lateral ambient plumes */
+        .aurora-glow-left {
+            position: absolute;
+            top: 15%;
+            left: -18%;
+            width: 70vw;
+            height: 75vh;
+            border-radius: 50%;
+            filter: blur(90px);
+            animation: aurora-drift-1 16s ease-in-out infinite alternate;
+        }
+        .dark .aurora-glow-left {
+            background: radial-gradient(circle, rgba(29, 78, 216, 0.55) 0%, rgba(37, 99, 235, 0.28) 45%, transparent 75%);
+        }
+        :root:not(.dark) .aurora-glow-left {
+            background: radial-gradient(circle, rgba(186, 230, 253, 0.6) 0%, rgba(199, 210, 254, 0.35) 45%, transparent 75%);
+        }
+
+        .aurora-glow-right {
+            position: absolute;
+            top: 12%;
+            right: -18%;
+            width: 70vw;
+            height: 80vh;
+            border-radius: 50%;
+            filter: blur(95px);
+            animation: aurora-drift-2 18s ease-in-out infinite alternate;
+        }
+        .dark .aurora-glow-right {
+            background: radial-gradient(circle, rgba(2, 132, 199, 0.5) 0%, rgba(30, 64, 175, 0.35) 48%, transparent 75%);
+        }
+        :root:not(.dark) .aurora-glow-right {
+            background: radial-gradient(circle, rgba(191, 219, 254, 0.6) 0%, rgba(224, 231, 255, 0.35) 48%, transparent 75%);
+        }
+
+        /* Illuminated Bottom Horizon Glow */
+        .aurora-horizon-glow {
+            position: absolute;
+            bottom: -12vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 125vw;
+            height: 46vh;
+            border-radius: 50%;
+            filter: blur(48px);
+            animation: horizon-pulse 10s ease-in-out infinite alternate;
+        }
+        .dark .aurora-horizon-glow {
+            background: radial-gradient(ellipse at 50% 100%, rgba(240, 248, 255, 0.88) 0%, rgba(186, 230, 253, 0.7) 22%, rgba(59, 130, 246, 0.45) 50%, rgba(29, 78, 216, 0.15) 75%, transparent 95%);
+        }
+        :root:not(.dark) .aurora-horizon-glow {
+            background: radial-gradient(ellipse at 50% 100%, #ffffff 0%, rgba(224, 242, 254, 0.85) 25%, rgba(186, 230, 253, 0.5) 55%, transparent 95%);
+        }
+
+        /* Subtle vertical grid lines along lower horizon */
+        .horizon-grid {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 36vh;
+            background-image: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0px, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 68px);
+            mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, transparent 100%);
+        }
+        :root:not(.dark) .horizon-grid {
+            background-image: repeating-linear-gradient(90deg, rgba(148, 163, 184, 0.15) 0px, rgba(148, 163, 184, 0.15) 1px, transparent 1px, transparent 68px);
+        }
+
+        @keyframes horizon-pulse {
+            0% { opacity: 0.82; transform: translateX(-50%) scaleY(1); }
+            50% { opacity: 0.98; transform: translateX(-50%) scaleY(1.08); }
+            100% { opacity: 0.85; transform: translateX(-50%) scaleY(0.97); }
+        }
+
+        @keyframes aurora-drift-1 {
+            0% { transform: translate3d(0, 0, 0) scale(1); }
+            50% { transform: translate3d(3vw, -4vh, 0) scale(1.08); }
+            100% { transform: translate3d(-3vw, 3vh, 0) scale(0.96); }
+        }
+
+        @keyframes aurora-drift-2 {
+            0% { transform: translate3d(0, 0, 0) scale(1.05); }
+            50% { transform: translate3d(-4vw, -3vh, 0) scale(0.95); }
+            100% { transform: translate3d(3vw, 4vh, 0) scale(1.1); }
+        }
+
+        /* Ambient Wave Lines */
+        .waves-svg {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 34vh;
+            opacity: 0.85;
+            overflow: visible;
+        }
+        :root:not(.dark) .waves-svg {
+            opacity: 0.55;
+        }
+
+        .wave-path-1 {
+            animation: wave-flow-1 12s ease-in-out infinite alternate;
+            transform-origin: center;
+        }
+        .wave-path-2 {
+            animation: wave-flow-2 15s ease-in-out infinite alternate;
+            transform-origin: center;
+        }
+        .wave-path-3 {
+            animation: wave-flow-3 18s ease-in-out infinite alternate;
+            transform-origin: center;
+        }
+
+        @keyframes wave-flow-1 {
+            0% { transform: translateY(0px) scaleY(1); }
+            50% { transform: translateY(-10px) scaleY(1.08); }
+            100% { transform: translateY(8px) scaleY(0.95); }
+        }
+        @keyframes wave-flow-2 {
+            0% { transform: translateY(0px) scaleY(0.98); }
+            50% { transform: translateY(12px) scaleY(1.05); }
+            100% { transform: translateY(-8px) scaleY(1); }
+        }
+        @keyframes wave-flow-3 {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-7px); }
+            100% { transform: translateY(6px); }
+        }
+
+        /* Minimalist Halo Ring Brand Icon */
+        .halo-ring {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .dark .halo-ring {
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 0 14px rgba(56, 189, 248, 0.8), inset 0 0 8px rgba(56, 189, 248, 0.5);
+        }
+        .dark .halo-ring::after {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #ffffff;
+            box-shadow: 0 0 10px #38bdf8;
+        }
+        :root:not(.dark) .halo-ring {
+            border: 2px solid #0284c7;
+            box-shadow: 0 0 12px rgba(2, 132, 199, 0.4), inset 0 0 6px rgba(56, 189, 248, 0.3);
+        }
+        :root:not(.dark) .halo-ring::after {
+            content: '';
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #0284c7;
+            box-shadow: 0 0 8px #0284c7;
+        }
+        .halo-ring:hover {
+            transform: scale(1.08);
+        }
+
+        /* Glassmorphism navigation & panels */
+        .dark .glass-panel {
+            background: rgba(13, 20, 36, 0.65);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+        :root:not(.dark) .glass-panel {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.06), inset 0 1px 0 #ffffff;
+        }
+
+        .dark .glass-nav {
+            background: rgba(2, 4, 10, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        :root:not(.dark) .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.85);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
+                /* Auth forms and buttons */
+        .field { width: 100%; border-radius: 0.75rem; padding: 0.65rem 0.9rem; font-size: 0.875rem; outline: none; transition: border-color .2s, box-shadow .2s; }
+        .dark .field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #f1f5f9; }
+        :root:not(.dark) .field { background: #ffffff; border: 1px solid #cbd5e1; color: #0f172a; }
+        .field:focus { border-color: #22d3ee; box-shadow: 0 0 0 3px rgba(34,211,238,0.18); }
+        .dark .field:-webkit-autofill { -webkit-text-fill-color: #f1f5f9; box-shadow: 0 0 0 1000px #0f172a inset; }
+        .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: 9999px; padding: .7rem 1.4rem; font-size: .875rem; font-weight: 600; color: #fff; background: linear-gradient(135deg, #0ea5e9, #2563eb); box-shadow: 0 8px 24px rgba(37,99,235,.35); transition: transform .15s, box-shadow .15s; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(37,99,235,.5); }
+        .btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: .5rem; border-radius: 9999px; padding: .7rem 1.4rem; font-size: .875rem; font-weight: 600; transition: background .15s; }
+        .dark .btn-ghost { color: #e2e8f0; border: 1px solid rgba(255,255,255,.18); background: rgba(255,255,255,.04); }
+        :root:not(.dark) .btn-ghost { color: #0f172a; border: 1px solid #cbd5e1; background: #fff; }
+        .dark .btn-ghost:hover { background: rgba(255,255,255,.1); }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="dark:bg-[#02040a] dark:text-slate-100 bg-[#f8fafc] text-slate-800 min-h-screen overflow-x-hidden flex flex-col relative antialiased selection:bg-cyan-500/30 selection:text-white">
+
+    <!-- ─── BACKGROUND ANIMATION LAYER ─── -->
+    <div class="aurora-bg">
+        <div class="aurora-glow-left"></div>
+        <div class="aurora-glow-right"></div>
+        <div class="aurora-horizon-glow"></div>
+        <div class="horizon-grid"></div>
+
+        <!-- Flowing Vector Wave Lines -->
+        <svg class="waves-svg" viewBox="0 0 1440 280" fill="none" preserveAspectRatio="none">
+            <!-- Wave 1: Cyan/Azure Sine Contour -->
+            <path class="wave-path-1" d="M -50,180 C 250,110 520,240 820,150 C 1120,60 1320,220 1500,160" stroke="url(#waveGrad1)" stroke-width="1.8" fill="none"/>
+            <!-- Wave 2: Royal Blue Accent -->
+            <path class="wave-path-2" d="M -50,230 C 280,150 600,270 900,190 C 1200,110 1360,230 1500,210" stroke="url(#waveGrad2)" stroke-width="1.4" stroke-opacity="0.8" fill="none"/>
+            <!-- Wave 3: Subtle Luminous Filament -->
+            <path class="wave-path-3" d="M -50,140 C 320,210 680,130 980,220 C 1280,160 1400,200 1500,190" stroke="url(#waveGrad3)" stroke-width="1.2" stroke-opacity="0.6" fill="none"/>
+
+            <defs>
+                <linearGradient id="waveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/>
+                    <stop offset="35%" stop-color="#38bdf8" stop-opacity="0.95"/>
+                    <stop offset="70%" stop-color="#93c5fd" stop-opacity="0.95"/>
+                    <stop offset="100%" stop-color="#3b82f6" stop-opacity="0.3"/>
+                </linearGradient>
+                <linearGradient id="waveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#2563eb" stop-opacity="0.1"/>
+                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.8"/>
+                    <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.25"/>
+                </linearGradient>
+                <linearGradient id="waveGrad3" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.1"/>
+                    <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.6"/>
+                    <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.1"/>
+                </linearGradient>
+            </defs>
+        </svg>
+    </div>
+
+    <!-- ─── HEADER / NAVIGATION ─── -->
+        <header class="sticky top-0 z-50 glass-nav transition-all duration-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <a href="{% if user.is_authenticated %}/ask/{% else %}/{% endif %}" class="flex items-center gap-3 group">
+                        <div class="halo-ring"></div>
+                        <span class="text-sm font-semibold tracking-tight text-slate-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-cyan-300 transition-colors">DocuRAG</span>
+                    </a>
+                </div>
+
+                {% if user.is_authenticated %}
+                <nav class="hidden md:flex items-center space-x-3 text-xs font-medium tracking-wide">
+                    <a href="/ask/" class="px-3 py-1.5 rounded-full transition-all {% block nav_ask %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5{% endblock %}">Studio</a>
+                    <a href="/library/" class="px-3 py-1.5 rounded-full transition-all {% block nav_library %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5{% endblock %}">Library</a>
+                    <a href="/history/" class="px-3 py-1.5 rounded-full transition-all {% block nav_history %}text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5{% endblock %}">Insights</a>
+                    <button id="openDocsModalBtn" class="px-3 py-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5 transition-all cursor-pointer">Docs</button>
+                </nav>
+                {% else %}
+                <nav class="hidden md:flex items-center space-x-3 text-xs font-medium tracking-wide">
+                    <a href="/#features" class="px-3 py-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5 transition-all">Features</a>
+                    <a href="/#how-it-works" class="px-3 py-1.5 rounded-full text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5 transition-all">How it works</a>
+                </nav>
+                {% endif %}
+
+                <div class="flex items-center space-x-3">
+                    {% if user.is_authenticated %}
+                        {% firstof user.first_name user.username as display_name %}
+                        <div id="statusBadge" class="hidden lg:flex items-center gap-2 px-3 py-1 rounded-full bg-slate-200/60 dark:bg-white/5 border border-slate-300/60 dark:border-white/10 text-[11px] text-cyan-600 dark:text-cyan-300 font-medium cursor-help" title="Active Model: Gemini Flash / Nvidia NIM fallback">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-cyan-400 animate-pulse"></span>
+                            <span>Gemini 3.5 Active</span>
+                        </div>
+                        <div class="hidden sm:flex items-center gap-2 pl-1 pr-3 py-1 rounded-full bg-slate-200/60 dark:bg-white/5 border border-slate-300/60 dark:border-white/10">
+                            <span class="w-6 h-6 rounded-full bg-cyan-600 text-white text-[11px] font-semibold flex items-center justify-center">{{ display_name|slice:":1"|upper }}</span>
+                            <span class="text-xs font-medium text-slate-700 dark:text-slate-200 max-w-[8rem] truncate">{{ display_name }}</span>
+                        </div>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-200 bg-slate-200/60 dark:bg-white/5 border border-slate-300/60 dark:border-white/10 hover:bg-slate-300/60 dark:hover:bg-white/10 transition-colors">Log out</button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="px-3.5 py-1.5 rounded-full text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors">Log in</a>
+                        <a href="{% url 'signup' %}" class="px-3.5 py-1.5 rounded-full bg-cyan-600 hover:bg-cyan-500 text-xs text-white font-medium shadow-sm transition-all hover:scale-105">Sign up</a>
+                    {% endif %}
+
+                    <button id="themeToggle" aria-label="Toggle Theme" class="p-2 rounded-xl bg-slate-200/60 dark:bg-white/5 border border-slate-300/60 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-300/60 dark:hover:bg-white/10 transition-colors" title="Toggle Theme">
+                        <svg id="sunIcon" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z"></path></svg>
+                        <svg id="moonIcon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ─── MAIN CONTENT VIEWPORT ─── -->
+    <main class="relative z-10 flex-1 flex flex-col w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ─── DOCUMENTATION & API QUICKSTART MODAL ─── -->
+    <div id="docsModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div id="docsModalBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
+
+        <!-- Modal Dialog -->
+        <div class="relative bg-white dark:bg-[#0c121e] border border-slate-200 dark:border-white/15 rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6 sm:p-8 shadow-2xl z-10 text-slate-800 dark:text-slate-100">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-white/10 mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 flex items-center justify-center font-bold text-sm">
+                        📖
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900 dark:text-white">DocuRAG Studio Documentation</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Architecture, API reference, and keyboard shortcuts</p>
+                    </div>
+                </div>
+                <button id="closeDocsModalBtn" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" aria-label="Close modal">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="space-y-6 text-xs sm:text-sm leading-relaxed">
+                <!-- System Architecture -->
+                <div>
+                    <h3 class="font-bold text-sm text-cyan-600 dark:text-cyan-400 uppercase tracking-wider mb-2">1. System Architecture</h3>
+                    <p class="text-slate-600 dark:text-slate-300 mb-2">
+                        DocuRAG combines visual extraction with dense semantic retrieval and sparse lexical keyword search:
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <span class="font-bold block text-slate-900 dark:text-white">Ingestion</span>
+                            <span class="text-slate-500 dark:text-slate-400">PDFPlumber & PyMuPDF extract layout, tables, text, and page previews.</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <span class="font-bold block text-slate-900 dark:text-white">Hybrid Retrieval</span>
+                            <span class="text-slate-500 dark:text-slate-400">Dense FAISS embeddings combined with Rank-BM25 reciprocal rank fusion.</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <span class="font-bold block text-slate-900 dark:text-white">LLM Generation</span>
+                            <span class="text-slate-500 dark:text-slate-400">Gemini 3.5 Flash generates grounded answers with Nvidia NIM fallback.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supported Documents -->
+                <div>
+                    <h3 class="font-bold text-sm text-cyan-600 dark:text-cyan-400 uppercase tracking-wider mb-2">2. Supported File Formats</h3>
+                    <div class="flex flex-wrap gap-2 text-xs">
+                        <span class="px-2.5 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 font-mono font-medium">.PDF</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 font-mono font-medium">.PNG</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-mono font-medium">.JPG / .JPEG</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 font-mono font-medium">.WEBP</span>
+                        <span class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-500 font-medium">Max 50MB per file</span>
+                    </div>
+                </div>
+
+                <!-- API Reference -->
+                <div>
+                    <h3 class="font-bold text-sm text-cyan-600 dark:text-cyan-400 uppercase tracking-wider mb-2">3. REST API Quickstart</h3>
+                    <div class="space-y-2 text-xs font-mono">
+                        <div class="p-3 rounded-xl bg-slate-900 text-slate-200 overflow-x-auto">
+                            <span class="text-emerald-400">POST</span> /api/documents/upload/ <span class="text-slate-500"># Multipart form file upload</span><br>
+                            <span class="text-cyan-400">POST</span> /api/query/ <span class="text-slate-500"># {"question": "...", "document_ids": [2]}</span><br>
+                            <span class="text-yellow-400">GET</span> /api/documents/ <span class="text-slate-500"># List all indexed documents</span><br>
+                            <span class="text-yellow-400">GET</span> /api/history/ <span class="text-slate-500"># Query logs with latency metrics</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Keyboard Shortcuts -->
+                <div>
+                    <h3 class="font-bold text-sm text-cyan-600 dark:text-cyan-400 uppercase tracking-wider mb-2">4. Keyboard Shortcuts</h3>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <span class="text-slate-600 dark:text-slate-300">Submit Message</span>
+                            <kbd class="px-2 py-0.5 rounded bg-white dark:bg-black/40 border border-slate-300 dark:border-white/20 font-mono text-[10px]">Enter</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <span class="text-slate-600 dark:text-slate-300">New Line</span>
+                            <kbd class="px-2 py-0.5 rounded bg-white dark:bg-black/40 border border-slate-300 dark:border-white/20 font-mono text-[10px]">Shift + Enter</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <span class="text-slate-600 dark:text-slate-300">Close Drawer / Modal</span>
+                            <kbd class="px-2 py-0.5 rounded bg-white dark:bg-black/40 border border-slate-300 dark:border-white/20 font-mono text-[10px]">Esc</kbd>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded-lg bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                            <span class="text-slate-600 dark:text-slate-300">Open Sessions</span>
+                            <kbd class="px-2 py-0.5 rounded bg-white dark:bg-black/40 border border-slate-300 dark:border-white/20 font-mono text-[10px]">Alt + S</kbd>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Toast Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+        {% if user.is_authenticated %}
+    <script>
+        window.CSRF_TOKEN = "{{ csrf_token }}";
+        (function () {
+            const originalFetch = window.fetch;
+            window.fetch = function (input, init) {
+                init = init || {};
+                const method = (init.method || (input && input.method) || 'GET').toUpperCase();
+                const url = typeof input === 'string' ? input : ((input && input.url) || '');
+                const sameOrigin = url.startsWith('/') || url.startsWith(window.location.origin);
+                if (sameOrigin && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+                    const headers = new Headers(init.headers || (input && input.headers) || {});
+                    if (!headers.has('X-CSRFToken')) headers.set('X-CSRFToken', window.CSRF_TOKEN);
+                    init.headers = headers;
+                    init.credentials = init.credentials || 'same-origin';
+                }
+                return originalFetch.call(this, input, init);
+            };
+        })();
+    </script>
+    <script src="/static/js/app.js"></script>
+    {% else %}
+    <script>
+        document.getElementById('themeToggle')?.addEventListener('click', function () {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('docurag_theme', isDark ? 'dark' : 'light');
+        });
+    </script>
+    {% endif %}
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

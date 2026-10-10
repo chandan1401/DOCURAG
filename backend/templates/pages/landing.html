@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% block title %}DocuRAG - Ask your documents anything{% endblock %}
+
+{% block content %}
+<!-- Hero -->
+<section class="px-4 sm:px-6 lg:px-8 pt-16 sm:pt-24 pb-14">
+  <div class="max-w-4xl mx-auto text-center">
+    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-medium bg-cyan-500/10 border border-cyan-500/30 text-cyan-700 dark:text-cyan-300">
+      <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span>
+      Multimodal document Q&amp;A
+    </span>
+    <h1 class="mt-6 text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.05] text-slate-900 dark:text-white">
+      Ask your documents.<br>
+      <span class="bg-gradient-to-r from-sky-500 via-cyan-400 to-blue-500 bg-clip-text text-transparent">Get answers you can verify.</span>
+    </h1>
+    <p class="mt-6 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-300">
+      Upload PDFs, scans and images. DocuRAG reads the text, tables and figures, then answers in plain language with a citation to the exact page behind each claim.
+    </p>
+    <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="{% url 'signup' %}" class="btn-primary">Get started</a>
+      <a href="{% url 'login' %}" class="btn-ghost">Log in</a>
+    </div>
+    <p class="mt-4 text-xs text-slate-500 dark:text-slate-400">PDF, PNG, JPG and WEBP, up to 50 MB per file</p>
+  </div>
+
+  <!-- Product preview -->
+  <div class="max-w-3xl mx-auto mt-14">
+    <div class="glass-panel rounded-3xl p-5 sm:p-7 text-left">
+      <div class="flex justify-end">
+        <div class="rounded-2xl px-4 py-2 text-sm bg-slate-200/70 dark:bg-white/10 text-slate-800 dark:text-slate-100">What does each file contain?</div>
+      </div>
+      <div class="mt-4 flex flex-wrap items-center gap-2 text-[11px]">
+        <span class="px-2.5 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-700 dark:text-cyan-300">Confidence: 95%</span>
+        <span class="px-2.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/30 text-violet-700 dark:text-violet-300">5 cited passages</span>
+      </div>
+      <div class="mt-3 text-sm leading-relaxed text-slate-700 dark:text-slate-200 space-y-2">
+        <p><strong>Vendor contract:</strong> a 12-month service agreement with monthly fees and a termination clause
+          <span class="ml-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">E1</span></p>
+        <p><strong>Q3 report:</strong> revenue by region, with a chart of quarterly growth
+          <span class="ml-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">E3</span></p>
+        <p><strong>Site photo:</strong> a building entrance with glass panels and stone steps
+          <span class="ml-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-cyan-500/15 text-cyan-700 dark:text-cyan-300">E5</span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section id="features" class="px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20">
+  <div class="max-w-6xl mx-auto">
+    <h2 class="text-center text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Built to be trusted, not just fast</h2>
+    <p class="mt-3 text-center text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">Every answer shows where it came from and how sure the system is.</p>
+
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="glass-panel rounded-2xl p-6">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Retrieval</div>
+        <h3 class="mt-2 font-semibold text-slate-900 dark:text-white">Hybrid search</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Semantic vectors and keyword matching are fused, then a reranker picks the passages that really answer your question.</p>
+      </div>
+      <div class="glass-panel rounded-2xl p-6">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Vision</div>
+        <h3 class="mt-2 font-semibold text-slate-900 dark:text-white">Tables, charts and images</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Figures and photos are described and indexed, so you can ask about what is in a picture, not just the text around it.</p>
+      </div>
+      <div class="glass-panel rounded-2xl p-6">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Trust</div>
+        <h3 class="mt-2 font-semibold text-slate-900 dark:text-white">Cited answers</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Each claim links to a page. Click a citation to see the source page next to the answer.</p>
+      </div>
+      <div class="glass-panel rounded-2xl p-6">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Trust</div>
+        <h3 class="mt-2 font-semibold text-slate-900 dark:text-white">Honest confidence</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">When the documents do not contain the answer, DocuRAG says so and the confidence score drops, instead of guessing.</p>
+      </div>
+      <div class="glass-panel rounded-2xl p-6">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Control</div>
+        <h3 class="mt-2 font-semibold text-slate-900 dark:text-white">One file or all of them</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Tick the documents to search, or name a file in your question to focus on it.</p>
+      </div>
+      <div class="glass-panel rounded-2xl p-6">
+        <div class="text-[11px] font-semibold uppercase tracking-wider text-cyan-600 dark:text-cyan-400">Ingestion</div>
+        <h3 class="mt-2 font-semibold text-slate-900 dark:text-white">Scans included</h3>
+        <p class="mt-2 text-sm text-slate-600 dark:text-slate-300">Scanned pages go through OCR, so image-only PDFs are searchable too.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How it works -->
+<section id="how-it-works" class="px-4 sm:px-6 lg:px-8 py-16 scroll-mt-20">
+  <div class="max-w-5xl mx-auto">
+    <h2 class="text-center text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">How it works</h2>
+    <div class="mt-10 grid gap-6 md:grid-cols-3">
+      <div class="text-center">
+        <div class="mx-auto w-11 h-11 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-sky-500 to-blue-600">1</div>
+        <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Upload</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Add PDFs and images to your library. They are processed and indexed in the background.</p>
+      </div>
+      <div class="text-center">
+        <div class="mx-auto w-11 h-11 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-sky-500 to-blue-600">2</div>
+        <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Ask</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Type a question in plain language, about one document or all of them.</p>
+      </div>
+      <div class="text-center">
+        <div class="mx-auto w-11 h-11 rounded-full flex items-center justify-center font-bold text-white bg-gradient-to-br from-sky-500 to-blue-600">3</div>
+        <h3 class="mt-4 font-semibold text-slate-900 dark:text-white">Verify</h3>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-300">Open the cited pages and check the answer against the source.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Final CTA -->
+<section class="px-4 sm:px-6 lg:px-8 py-16">
+  <div class="max-w-3xl mx-auto glass-panel rounded-3xl p-10 text-center">
+    <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">Ready to ask your first question?</h2>
+    <p class="mt-3 text-slate-600 dark:text-slate-300">Create an account and upload a document in under a minute.</p>
+    <div class="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+      <a href="{% url 'signup' %}" class="btn-primary">Create your account</a>
+      <a href="{% url 'login' %}" class="btn-ghost">I already have one</a>
+    </div>
+  </div>
+</section>
+
+<footer class="px-4 py-8 text-center text-xs text-slate-500 dark:text-slate-400">DocuRAG</footer>
+{% endblock %}

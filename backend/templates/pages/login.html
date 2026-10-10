@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Log in - DocuRAG{% endblock %}
+
+{% block content %}
+<section class="flex-1 flex items-center justify-center px-4 py-16">
+  <div class="glass-panel w-full max-w-md rounded-3xl p-8">
+    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
+    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Log in to your DocuRAG workspace.</p>
+
+    {% if form.non_field_errors %}
+    <div class="mt-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-300">{{ form.non_field_errors.0 }}</div>
+    {% endif %}
+
+    <form method="post" class="mt-6 space-y-4" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <div>
+        <label for="id_username" class="block mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">Email</label>
+        <input type="email" name="username" id="id_username" value="{{ form.username.value|default:'' }}" required autofocus autocomplete="email" class="field" placeholder="you@example.com">
+        {% for e in form.username.errors %}<p class="mt-1 text-xs text-red-500">{{ e }}</p>{% endfor %}
+      </div>
+      <div>
+        <label for="id_password" class="block mb-1 text-xs font-medium text-slate-600 dark:text-slate-300">Password</label>
+        <input type="password" name="password" id="id_password" required autocomplete="current-password" class="field">
+        {% for e in form.password.errors %}<p class="mt-1 text-xs text-red-500">{{ e }}</p>{% endfor %}
+      </div>
+      <button type="submit" class="btn-primary w-full">Log in</button>
+    </form>
+
+    <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+      New to DocuRAG? <a href="{% url 'signup' %}" class="font-medium text-cyan-600 dark:text-cyan-400 hover:underline">Create an account</a>
+    </p>
+  </div>
+</section>
+{% endblock %}

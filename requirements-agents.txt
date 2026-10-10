@@ -1,0 +1,4 @@
+# Multi-Agent Runtime & FastMCP Dependencies (M8)
+langgraph>=0.2.0
+mcp>=1.0.0
+fastmcp>=0.1.0

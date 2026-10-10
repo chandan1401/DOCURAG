@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}DocuRAG Studio — Document AI Chatbot{% endblock %}
+
+{% block nav_ask %}text-cyan-600 dark:text-white font-semibold bg-cyan-500/10 dark:bg-white/10 border border-cyan-500/20 dark:border-white/10 shadow-xs{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Floating Frosted Milk-Glass Prompt Card (Exact Reference Design Match) */
+    .hero-glass-card {
+        background: rgba(238, 245, 255, 0.86);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        border-radius: 2.25rem;
+        box-shadow: 
+            0 35px 85px -15px rgba(0, 8, 30, 0.52),
+            0 0 50px rgba(56, 189, 248, 0.22),
+            inset 0 2px 3px rgba(255, 255, 255, 1);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .hero-glass-card:focus-within {
+        background: rgba(246, 251, 255, 0.94);
+        border-color: #ffffff;
+        box-shadow: 
+            0 45px 100px -12px rgba(0, 8, 30, 0.65),
+            0 0 65px rgba(56, 189, 248, 0.38),
+            inset 0 2px 4px #ffffff;
+    }
+
+    /* Reference Pill Tag Styling (Soft frosted capsules inside light card) */
+    .reference-pill {
+        background: rgba(255, 255, 255, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        color: #334155;
+        font-weight: 500;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .reference-pill:hover {
+        background: #ffffff;
+        border-color: #38bdf8;
+        color: #0284c7;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.18);
+    }
+
+    /* Reference Generate Action Pill Button (High contrast dark pill button) */
+    .generate-pill-btn {
+        background: #0f1322;
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.38);
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .generate-pill-btn:hover:not(:disabled) {
+        background: #19223a;
+        border-color: rgba(56, 189, 248, 0.6);
+        box-shadow: 0 0 24px rgba(56, 189, 248, 0.5);
+        transform: scale(1.03);
+    }
+
+    /* Markdown inside chat messages */
+    .markdown-body {
+        line-height: 1.7;
+    }
+    .dark .markdown-body {
+        color: #e2e8f0;
+    }
+    :root:not(.dark) .markdown-body {
+        color: #1e293b;
+    }
+    .dark .markdown-body pre { 
+        background: rgba(0, 0, 0, 0.5) !important; 
+        border: 1px solid rgba(255, 255, 255, 0.1); 
+        color: #f1f5f9; 
+    }
+    :root:not(.dark) .markdown-body pre {
+        background: #0f172a !important;
+        border: 1px solid #334155;
+        color: #f8fafc;
+    }
+    .markdown-body pre {
+        padding: 1.1em; 
+        border-radius: 0.75rem; 
+        overflow-x: auto; 
+        margin: 1em 0;
+    }
+    .markdown-body code {
+        background: rgba(56, 189, 248, 0.12);
+        padding: 0.15em 0.35em;
+        border-radius: 0.3em;
+        font-size: 0.9em;
+        color: #0284c7;
+    }
+    .dark .markdown-body code {
+        color: #38bdf8;
+    }
+    .markdown-body table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1em 0;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .markdown-body th, .markdown-body td {
+        border: 1px solid rgba(148, 163, 184, 0.15);
+        padding: 0.6em 0.9em;
+        text-align: left;
+    }
+    .markdown-body th {
+        background: rgba(56, 189, 248, 0.08);
+        font-weight: 600;
+        color: #0284c7;
+    }
+    .dark .markdown-body th {
+        color: #38bdf8;
+    }
+
+    /* Interactive Citation Pill in markdown */
+    .citation-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        background: rgba(56, 189, 248, 0.15);
+        color: #0284c7;
+        border: 1px solid rgba(56, 189, 248, 0.35);
+        border-radius: 9999px;
+        padding: 1px 8px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin: 0 2px;
+    }
+    .dark .citation-pill {
+        color: #38bdf8;
+    }
+    .citation-pill:hover {
+        background: rgba(56, 189, 248, 0.3);
+        border-color: #38bdf8;
+        transform: translateY(-1px);
+        box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="flex-1 flex w-full h-[calc(100vh-4rem)] overflow-hidden relative">
+
+    <!-- Backdrop for Sidebar Drawer -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 z-30 hidden backdrop-blur-sm transition-opacity"></div>
+
+    <!-- Floating Sessions Toggle Button -->
+    <button id="sidebarToggleBtn" class="fixed top-20 left-4 sm:left-6 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 dark:bg-white/10 hover:bg-white dark:hover:bg-white/15 backdrop-blur-xl border border-slate-300 dark:border-white/15 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-xs font-medium transition-all hover:scale-105 shadow-md group" title="Open chat sessions (Alt + S)">
+        <svg class="w-3.5 h-3.5 text-cyan-600 dark:text-cyan-400 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+        <span class="hidden sm:inline">Sessions</span>
+    </button>
+
+    <!-- Slide-Out Chat History Sidebar Drawer -->
+    <aside id="sidebar" class="w-[280px] sm:w-[320px] bg-white/95 dark:bg-[#070b16]/98 backdrop-blur-2xl border-r border-slate-200 dark:border-white/10 flex flex-col z-40 fixed inset-y-0 left-0 -translate-x-full transition-transform duration-300 shadow-2xl text-slate-800 dark:text-slate-100">
+        <div class="p-4 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <button id="sidebarCloseBtn" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors" title="Close drawer (Esc)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Chat Sessions</span>
+            </div>
+            <button id="newChatBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/30 text-cyan-600 dark:text-cyan-400 text-xs font-medium transition-all" title="Start fresh session">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                <span>New</span>
+            </button>
+        </div>
+
+        <!-- Query History List in Sidebar -->
+        <div class="flex-1 overflow-y-auto p-3">
+            <div id="historySidebarContent" class="space-y-1">
+                <div class="text-center text-slate-400 dark:text-slate-500 text-xs py-6">Loading recent questions...</div>
+            </div>
+        </div>
+
+        <!-- Document Library Quick Link -->
+        <div class="p-3 border-t border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20">
+            <a href="/library/" class="flex items-center justify-between p-2.5 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-xs text-slate-700 dark:text-slate-300 transition-colors">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-cyan-600 dark:text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    <span>Manage Library</span>
+                </div>
+                <span id="sidebarDocBadge" class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-600 dark:text-cyan-300 font-mono text-[10px]">0 Docs</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Studio Viewport -->
+    <div class="flex-1 flex flex-col relative h-full overflow-hidden">
+
+        <!-- Studio Control Header Bar (Shown only in active chat) -->
+        <div id="chatToolbar" class="h-12 border-b border-slate-200 dark:border-white/5 px-4 sm:px-6 flex items-center justify-between bg-slate-100/60 dark:bg-black/20 backdrop-blur-md z-20 flex-shrink-0 hidden">
+            <div class="flex items-center gap-3">
+                <button id="mobileMenuToggle" class="p-1.5 -ml-2 rounded-lg hover:bg-slate-200 dark:hover:bg-white/10 text-slate-500 dark:text-slate-400 md:hidden" aria-label="Toggle Sessions">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <span id="chatTitleHeader" class="text-xs font-semibold text-slate-800 dark:text-slate-300 truncate max-w-xs sm:max-w-md">Studio Session</span>
+                <span id="activeDocTag" class="hidden sm:inline-flex items-center text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 dark:bg-white/5 border border-cyan-500/20 dark:border-white/10 text-cyan-600 dark:text-cyan-300">All Docs Active</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <button id="exportChatBtn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-200/50 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-300/60 dark:border-white/10 text-[11px] text-slate-700 dark:text-slate-300 transition-colors" title="Export as Markdown">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    <span class="hidden sm:inline">Export</span>
+                </button>
+                <button id="clearChatBtn" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-200/50 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-300/60 dark:border-white/10 text-[11px] text-slate-700 dark:text-slate-300 transition-colors" title="Clear View">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span class="hidden sm:inline">Clear</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ─── HERO STATE (Exact Layout from Reference Image) ─── -->
+        <div id="heroState" class="flex-1 overflow-y-auto flex flex-col items-center justify-center px-4 py-8 text-center z-10 transition-all duration-300">
+            
+            <!-- Headline & Subtitle -->
+            <div class="max-w-3xl mx-auto mb-10">
+                <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-4 leading-[1.12]">
+                    Build Insights People Love
+                </h1>
+                <p class="text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto font-normal leading-relaxed">
+                    From ideas to Answers, generate, design and search native document collections with an AI-powered verified workflow.
+                </p>
+            </div>
+
+            <!-- Central Floating Frosted Glass Console (Exact Reference Card) -->
+            <div class="w-full max-w-2xl px-2">
+                <div class="hero-glass-card rounded-[2.25rem] p-6 sm:p-7 text-left relative">
+                    
+                    <!-- Textarea Area with High Contrast & Readability -->
+                    <textarea id="questionInput" rows="2" class="w-full bg-transparent border-none text-slate-900 placeholder-slate-500 text-sm sm:text-base outline-none resize-none leading-relaxed focus:ring-0 p-0 mb-4 font-normal" placeholder="Type something to generate..."></textarea>
+
+                    <!-- Inside Bottom Row: Helper Pills & Generate Button -->
+                    <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-300/70">
+                        
+                        <!-- Left Helper Pills -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Document Context Selector Pill -->
+                            <div class="relative">
+                                <button id="docToggleBtn" class="reference-pill px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 text-slate-700" title="Filter active documents">
+                                    <svg class="w-3.5 h-3.5 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path></svg>
+                                    <span id="docToggleLabel">All Docs</span>
+                                </button>
+
+                                <!-- Document Selection Popup -->
+                                <div id="docDropdown" class="absolute bottom-full mb-3 left-0 w-72 bg-[#0c1322] border border-white/20 rounded-2xl p-4 hidden shadow-2xl backdrop-blur-2xl z-50 text-slate-200">
+                                    <div class="flex items-center justify-between mb-3 border-b border-white/10 pb-2">
+                                        <span class="text-xs font-bold text-slate-200 uppercase tracking-wider">Active Documents</span>
+                                        <label class="flex items-center space-x-1.5 cursor-pointer text-xs text-cyan-400 hover:text-cyan-300">
+                                            <input type="checkbox" id="selectAllDocs" checked class="form-checkbox h-3.5 w-3.5 rounded bg-black/50 border-white/20 text-cyan-500 focus:ring-cyan-500">
+                                            <span>All</span>
+                                        </label>
+                                    </div>
+                                    <div id="documentSelector" class="space-y-1 max-h-48 overflow-y-auto pr-1">
+                                        <div class="text-xs text-slate-500 text-center py-3" id="docLoadingText">Loading documents...</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preset Prompt Helper Pills -->
+                            <button class="prompt-pill reference-pill px-3 py-1.5 rounded-full text-xs font-medium text-slate-700" data-prompt="Summarize the core concepts and findings of the document in 5 key takeaways.">
+                                Summary
+                            </button>
+                            <button class="prompt-pill reference-pill px-3 py-1.5 rounded-full text-xs font-medium text-slate-700" data-prompt="Extract 5 challenging aptitude or test questions found in this material with answers.">
+                                Exam Quiz
+                            </button>
+                            <button class="prompt-pill reference-pill px-3 py-1.5 rounded-full text-xs font-medium text-slate-700" data-prompt="Extract all key statistical tables, numbers, and percentage figures into Markdown tables.">
+                                Tables
+                            </button>
+                            <button class="prompt-pill reference-pill px-3 py-1.5 rounded-full text-xs font-medium text-slate-700" data-prompt="Extract and define all specialized acronyms, technical definitions, and formulas.">
+                                Glossary
+                            </button>
+                        </div>
+
+                        <!-- Right Generate Action Pill Button -->
+                        <button id="askBtn" class="generate-pill-btn px-6 py-2 rounded-full text-white text-xs font-semibold flex items-center gap-2 flex-shrink-0 disabled:opacity-40 disabled:cursor-not-allowed ml-auto">
+                            <span>Generate</span>
+                            <svg class="w-3.5 h-3.5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bottom Ethereal Tagline (Matching Reference Image) -->
+                <div class="text-center mt-6 text-xs text-slate-400 font-medium tracking-wide flex items-center justify-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                    <span>Launch answers 10x faster with verified citations</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ─── CHAT TIMELINE (Active State) ─── -->
+        <div id="chatHistory" class="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 z-20 pb-44 hidden">
+            <!-- Messages injected dynamically -->
+        </div>
+
+        <!-- Bottom Input Bar (Only visible when chatting) -->
+        <div id="dockedInputContainer" class="hidden absolute bottom-5 left-1/2 -translate-x-1/2 w-[95%] max-w-3xl z-30">
+            <div class="hero-glass-card rounded-2xl p-2.5 pl-4 flex items-end gap-2 shadow-2xl">
+                <textarea id="dockedQuestionInput" rows="1" class="flex-1 bg-transparent border-none text-slate-900 placeholder-slate-500 text-sm outline-none resize-none leading-relaxed focus:ring-0 p-2 font-normal" placeholder="Ask a follow-up question..."></textarea>
+                <button id="dockedAskBtn" class="generate-pill-btn w-10 h-10 rounded-full flex items-center justify-center text-white flex-shrink-0" title="Send message">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Source Drawer for Deep Evidence Inspection -->
+<div id="sourceDrawer" class="fixed inset-y-0 right-0 w-full sm:w-[500px] md:w-[580px] bg-white/98 dark:bg-[#070b16]/98 border-l border-slate-200 dark:border-white/10 shadow-2xl transform translate-x-full z-50 transition-transform duration-300 backdrop-blur-2xl text-slate-800 dark:text-slate-100">
+    <div class="h-full flex flex-col">
+        <div class="flex justify-between items-center p-5 border-b border-slate-200 dark:border-white/10 bg-slate-100/50 dark:bg-black/20">
+            <div class="flex items-center gap-2.5 truncate pr-3">
+                <div class="w-6 h-6 rounded bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <div>
+                    <h3 id="drawerTitle" class="font-semibold text-sm text-slate-900 dark:text-slate-200 truncate">Source Evidence</h3>
+                    <span id="drawerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400">Page Reference</span>
+                </div>
+            </div>
+            <button id="closeDrawer" class="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-white" aria-label="Close drawer">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+            <div>
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Retrieved Passage</h4>
+                <div id="drawerContent" class="bg-slate-100 dark:bg-[#0b101c] p-4 rounded-xl border border-slate-200 dark:border-white/10 font-mono text-xs text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap shadow-inner"></div>
+            </div>
+
+            <div id="drawerImageContainer" class="hidden">
+                <h4 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-2">Original Document Page</h4>
+                <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-black/40 p-1">
+                    <img id="drawerImage" src="" alt="Document page visual snippet" class="w-full rounded-lg shadow-xl max-h-[450px] object-contain">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
